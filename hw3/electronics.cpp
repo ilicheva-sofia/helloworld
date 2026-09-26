@@ -78,7 +78,7 @@ namespace Units{
         double value;
         public:
         Amper (double val): value(val){}
-        double get_value() { return value; }
+        double get_value() const { return value; }
         const char* unit(){ return "mA"; }
 
 
@@ -90,51 +90,61 @@ namespace Units{
         double value;
         public:
         Volt (double val): value(val){}
-        double get_value() { return value; }
+        double get_value() const { return value; }
         const char* unit(){ return "V"; }
 
     };
-   Volt operator""_V(long double val){ return Volt (static_cast<double> (val) ); }
+    Volt operator""_V(long double val){ return Volt (static_cast<double> (val) ); }
+    Volt operator*(const Amper &i, const Ohm &r){ return Volt (static_cast<double> ( i.get_value() * r.get_value()) ); }
+    Volt operator*( const Ohm &r, const Amper &i){ return Volt (static_cast<double> ( i.get_value() * r.get_value()) ); }
 
 
     class Ohm{
         double value;
         public:
         Ohm (double val): value(val){}
-        double get_value() { return value; }
+        double get_value() const { return value; }
         const char* unit(){ return "Ohm"; }
 
     };
     Ohm operator""_Ohm(long double val){ return Ohm (static_cast<double> (val) ); }
+    Ohm operator/( const Volt &u, const Amper &i){ return Ohm (static_cast<double> ( u.get_value() / i.get_value()) ); }
+
 
     class Watt{
         double value;
         public:
         Watt (double val): value(val){}
-        double get_value() { return value; }
+        double get_value()const { return value; }
         const char* unit(){ return "W"; }
 
     };
     Watt operator""_W(long double val){ return Watt (static_cast<double> (val) ); }
+    Watt operator*(const Amper &i, const Volt &u){ return Watt (static_cast<double> ( i.get_value() * u.get_value()) ); }
+    Watt operator*( const Volt &u, const Amper &i){ return Watt (static_cast<double> ( i.get_value() * u.get_value()) ); }
+
 
     class Joule{
         double value;
         public:
         Joule (double val): value(val){}
-        double get_value() { return value; }
+        double get_value() const { return value; }
         const char* unit(){ return "J"; }
 
     };
     Joule operator""_J (long double val){ return Joule (static_cast<double> (val) ); }
+    Joule operator*( const Watt &p, const Seconds &t){ return Joule (static_cast<double> ( p.get_value() * t.get_value()) ); }
+    Joule operator*( const Seconds &t, const Watt &p){ return Joule (static_cast<double> ( p.get_value() * t.get_value()) ); }
 
     class Seconds{
         double value;
         public:
         Seconds (double val): value(val){}
-        double get_value() { return value; }
+        double get_value() const { return value; }
         const char* unit(){ return "s"; }
     };
     Seconds operator""_s (long double val){ return Seconds (static_cast<double> (val) ); }
+
 
 
 }
@@ -144,9 +154,10 @@ int main(){
     using  namespace Units;
 
     Volt u = 12.0_V;
-    Amper i = 2.0_A;
+    Amper i = 2.0_mA;
     Ohm r = 6.0_Ohm;
     Seconds t = 10.0_s;
+    Watt p = 50.0_W;
 
     auto p1 = u * i;           // Volt * Ampere → Watt
     auto p2 = i * u;           // Ampere * Volt → Watt (работает!)
@@ -158,9 +169,9 @@ int main(){
     auto i2 = u / r;           // Volt / Ohm → Ampere
     auto u2 = i * r;           // Ampere * Ohm → Volt
 
-    std::cout << "Мощность (u*i): " << p1.getValue() << " " << p1.unit() << "\n";
-    std::cout << "Энергия (p*t): " << e1.getValue() << " " << e1.unit() << "\n";
-    std::cout << "Ток (u/r): " << i2.getValue() << " " << i2.unit() << "\n";
+    std::cout << "Мощность (u*i): " << p1.get_value() << " " << p1.unit() << "\n";
+    std::cout << "Энергия (p*t): " << e1.get_value() << " " << e1.unit() << "\n";
+    std::cout << "Ток (u/r): " << i2.get_value() << " " << i2.unit() << "\n";
 
     return 0;
 };
