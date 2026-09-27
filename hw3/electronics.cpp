@@ -50,7 +50,16 @@ namespace Device{
         std::string id;
 
         public:
-        Voltmeter(double range, double accuracy, std::string id);
+        explicit Voltmeter(double range, double accuracy, std::string id)
+             : range(range), accuracy(accuracy), id(std::move(id)) {
+        if (range <= 0.0)
+            throw std::invalid_argument("Диапазон должен быть положительным");
+        if (accuracy <= 0.0 || accuracy > 100.0)
+            throw std::invalid_argument("Класс точности должен быть от 0 до 100%");
+        if (id.empty())
+            throw std::invalid_argument("Идентификатор не может быть пустым");
+        }
+        
         Measurement <Units::Volt> measure () const { 
             std::mt19937 gen(std::random_device{}());
             std::uniform_real_distribution<> dist(0.0, range);
@@ -71,7 +80,16 @@ namespace Device{
         double accuracy;
         std::string id;
         public:
-        Ampermeter(double range, double accuracy, std::string id);
+        explicit Ampermeter(double range, double accuracy, std::string id)
+         : range(range), accuracy(accuracy), id(std::move(id)) {
+        if (range <= 0.0)
+            throw std::invalid_argument("Диапазон должен быть положительным");
+        if (accuracy <= 0.0 || accuracy > 100.0)
+            throw std::invalid_argument("Класс точности должен быть от 0 до 100%");
+        if (id.empty())
+            throw std::invalid_argument("Идентификатор не может быть пустым");
+        }
+
         Measurement <Units::Volt> measure () const { 
             std::mt19937 gen(std::random_device{}());
             std::uniform_real_distribution<> dist(0.0, range);
@@ -89,7 +107,15 @@ namespace Device{
         double accuracy;
         std::string id;
         public:
-        Multimeter (double range, double accuracy, std::string id);
+        explicit Multimeter (double range, double accuracy, std::string id)
+         : range(range), accuracy(accuracy), id(std::move(id)) {
+        if (range <= 0.0)
+            throw std::invalid_argument("Диапазон должен быть положительным");
+        if (accuracy <= 0.0 || accuracy > 100.0)
+            throw std::invalid_argument("Класс точности должен быть от 0 до 100%");
+        if (id.empty())
+            throw std::invalid_argument("Идентификатор не может быть пустым");
+        }
         Measurement <Units::Ohm> measure () const { 
             std::mt19937 gen(std::random_device{}());
             std::uniform_real_distribution<> dist(0.0, range);
@@ -109,7 +135,11 @@ namespace Units{
         private:
         double value;
         public:
-        Amper (double val): value(val){}
+        explicit Amper (double val): value(val){
+            if (val < 0.0){
+                throw std::invalid_argument("значение не может быть отрицательным");
+            }
+        }
         double get_value() const { return value; }
         const char* unit(){ return "mA"; }
 
@@ -121,7 +151,7 @@ namespace Units{
     class Volt{
         double value;
         public:
-        Volt (double val): value(val){}
+        explicit Volt (double val): value(val){}
         double get_value() const { return value; }
         const char* unit(){ return "V"; }
 
@@ -134,7 +164,11 @@ namespace Units{
     class Ohm{
         double value;
         public:
-        Ohm (double val): value(val){}
+        explicit Ohm (double val): value(val){
+            if (val < 0.0){
+                throw std::invalid_argument("значение не может быть отрицательным");
+            }
+        }
         double get_value() const { return value; }
         const char* unit(){ return "Ohm"; }
 
@@ -146,7 +180,11 @@ namespace Units{
     class Watt{
         double value;
         public:
-        Watt (double val): value(val){}
+        explicit Watt (double val): value(val){
+            if (val < 0.0){
+                throw std::invalid_argument("значение не может быть отрицательным");
+            }
+        }
         double get_value()const { return value; }
         const char* unit(){ return "W"; }
 
@@ -159,7 +197,11 @@ namespace Units{
     class Joule{
         double value;
         public:
-        Joule (double val): value(val){}
+        explicit Joule (double val): value(val){
+            if (val < 0.0){
+                throw std::invalid_argument("значение не может быть отрицательным");
+            }
+        }
         double get_value() const { return value; }
         const char* unit(){ return "J"; }
 
@@ -171,7 +213,11 @@ namespace Units{
     class Seconds{
         double value;
         public:
-        Seconds (double val): value(val){}
+        explicit Seconds (double val): value(val){
+            if (val < 0.0){
+                throw std::invalid_argument("значение не может быть отрицательным");
+            }
+        }
         double get_value() const { return value; }
         const char* unit(){ return "s"; }
     };
