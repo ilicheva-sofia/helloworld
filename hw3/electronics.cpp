@@ -16,7 +16,7 @@ class Measurement{
 template <typename T, typename CharT>
 struct std::formatter<Measurement<T>, CharT> {
     std::formatter<double, CharT> doubleFmt;
-    auto parse(std::format_parse_context& ctx) {
+     constexpr auto parse(std::format_parse_context& ctx) {
         return doubleFmt.parse(ctx);
     }
 
@@ -33,7 +33,7 @@ struct std::formatter<Measurement<T>, CharT> {
         // 2. Выводим: "значение ± погрешность ед (в HH:MM:SS)"
         auto out = ctx.out();
 
-        out = doubleFmt.format(m.value.getValue(), ctx);
+        out = doubleFmt.format(m.value.get_value(), ctx);
 
         out = std::format_to(out, " ± {:.4g} {} (в {})",
                             m.inaccuracy,
@@ -42,6 +42,109 @@ struct std::formatter<Measurement<T>, CharT> {
         return out;
     }
 };
+
+
+namespace Units{
+
+    class Amper{
+        private:
+        double value;
+        public:
+        explicit Amper (double val): value(val){
+            if (val < 0.0){
+                throw std::invalid_argument("значение не может быть отрицательным");
+            }
+        }
+        double get_value() const { return value; }
+        const char* unit() const{ return "mA"; }
+
+
+
+    }; 
+    Amper operator""_mA (long double val){ return Amper (static_cast<double> (val) ); }
+
+    class Volt{
+        double value;
+        public:
+        explicit Volt (double val): value(val){}
+        double get_value() const { return value; }
+        const char* unit() const{ return "V"; }
+
+    };
+    Volt operator""_V(long double val){ return Volt (static_cast<double> (val) ); }
+
+
+    class Ohm{
+        double value;
+        public:
+        explicit Ohm (double val): value(val){
+            if (val < 0.0){
+                throw std::invalid_argument("значение не может быть отрицательным");
+            }
+        }
+        double get_value() const { return value; }
+        const char* unit() const { return "Ohm"; }
+
+    };
+    Ohm operator""_Ohm(long double val){ return Ohm (static_cast<double> (val) ); }
+    
+
+    class Watt{
+        double value;
+        public:
+        explicit Watt (double val): value(val){
+            if (val < 0.0){
+                throw std::invalid_argument("значение не может быть отрицательным");
+            }
+        }
+        double get_value() const { return value; }
+        const char* unit() const { return "W"; }
+
+    };
+    Watt operator""_W(long double val){ return Watt (static_cast<double> (val) ); }
+    
+
+    class Joule{
+        double value;
+        public:
+        explicit Joule (double val): value(val){
+            if (val < 0.0){
+                throw std::invalid_argument("значение не может быть отрицательным");
+            }
+        }
+        double get_value() const { return value; }
+        const char* unit() const { return "J"; }
+
+    };
+    Joule operator""_J (long double val){ return Joule (static_cast<double> (val) ); }
+    
+
+    class Seconds{
+        double value;
+        public:
+        explicit Seconds (double val): value(val){
+            if (val < 0.0){
+                throw std::invalid_argument("значение не может быть отрицательным");
+            }
+        }
+        double get_value() const { return value; }
+        const char* unit() const { return "s"; }
+    };
+    Seconds operator""_s (long double val){ return Seconds (static_cast<double> (val) ); }
+
+    Amper operator/(const Volt &u, const Ohm &r){ return Amper (static_cast<double> ( u.get_value() / r.get_value()) ); }
+    Volt operator*(const Amper &i, const Ohm &r){ return Volt (static_cast<double> ( i.get_value() * r.get_value()) ); }
+    Volt operator*( const Ohm &r, const Amper &i){ return Volt (static_cast<double> ( i.get_value() * r.get_value()) ); }
+    Ohm operator/( const Volt &u, const Amper &i){ return Ohm (static_cast<double> ( u.get_value() / i.get_value()) ); }
+    Watt operator*(const Amper &i, const Volt &u){ return Watt (static_cast<double> ( i.get_value() * u.get_value()) ); }
+    Watt operator*( const Volt &u, const Amper &i){ return Watt (static_cast<double> ( i.get_value() * u.get_value()) ); }
+    Joule operator*( const Watt &p, const Seconds &t){ return Joule (static_cast<double> ( p.get_value() * t.get_value()) ); }
+    Joule operator*( const Seconds &t, const Watt &p){ return Joule (static_cast<double> ( p.get_value() * t.get_value()) ); }
+
+
+
+}
+
 namespace Device{
     class Voltmeter{
         private:
@@ -128,103 +231,6 @@ namespace Device{
 
 
     };
-}
-namespace Units{
-
-    class Amper{
-        private:
-        double value;
-        public:
-        explicit Amper (double val): value(val){
-            if (val < 0.0){
-                throw std::invalid_argument("значение не может быть отрицательным");
-            }
-        }
-        double get_value() const { return value; }
-        const char* unit(){ return "mA"; }
-
-
-
-    }; 
-    Amper operator""_mA (long double val){ return Amper (static_cast<double> (val) ); }
-    Amper operator/(const Volt &u, const Ohm &r){ return Amper (static_cast<double> ( u.get_value() / r.get_value()) ); }
-    class Volt{
-        double value;
-        public:
-        explicit Volt (double val): value(val){}
-        double get_value() const { return value; }
-        const char* unit(){ return "V"; }
-
-    };
-    Volt operator""_V(long double val){ return Volt (static_cast<double> (val) ); }
-    Volt operator*(const Amper &i, const Ohm &r){ return Volt (static_cast<double> ( i.get_value() * r.get_value()) ); }
-    Volt operator*( const Ohm &r, const Amper &i){ return Volt (static_cast<double> ( i.get_value() * r.get_value()) ); }
-
-
-    class Ohm{
-        double value;
-        public:
-        explicit Ohm (double val): value(val){
-            if (val < 0.0){
-                throw std::invalid_argument("значение не может быть отрицательным");
-            }
-        }
-        double get_value() const { return value; }
-        const char* unit(){ return "Ohm"; }
-
-    };
-    Ohm operator""_Ohm(long double val){ return Ohm (static_cast<double> (val) ); }
-    Ohm operator/( const Volt &u, const Amper &i){ return Ohm (static_cast<double> ( u.get_value() / i.get_value()) ); }
-
-
-    class Watt{
-        double value;
-        public:
-        explicit Watt (double val): value(val){
-            if (val < 0.0){
-                throw std::invalid_argument("значение не может быть отрицательным");
-            }
-        }
-        double get_value()const { return value; }
-        const char* unit(){ return "W"; }
-
-    };
-    Watt operator""_W(long double val){ return Watt (static_cast<double> (val) ); }
-    Watt operator*(const Amper &i, const Volt &u){ return Watt (static_cast<double> ( i.get_value() * u.get_value()) ); }
-    Watt operator*( const Volt &u, const Amper &i){ return Watt (static_cast<double> ( i.get_value() * u.get_value()) ); }
-
-
-    class Joule{
-        double value;
-        public:
-        explicit Joule (double val): value(val){
-            if (val < 0.0){
-                throw std::invalid_argument("значение не может быть отрицательным");
-            }
-        }
-        double get_value() const { return value; }
-        const char* unit(){ return "J"; }
-
-    };
-    Joule operator""_J (long double val){ return Joule (static_cast<double> (val) ); }
-    Joule operator*( const Watt &p, const Seconds &t){ return Joule (static_cast<double> ( p.get_value() * t.get_value()) ); }
-    Joule operator*( const Seconds &t, const Watt &p){ return Joule (static_cast<double> ( p.get_value() * t.get_value()) ); }
-
-    class Seconds{
-        double value;
-        public:
-        explicit Seconds (double val): value(val){
-            if (val < 0.0){
-                throw std::invalid_argument("значение не может быть отрицательным");
-            }
-        }
-        double get_value() const { return value; }
-        const char* unit(){ return "s"; }
-    };
-    Seconds operator""_s (long double val){ return Seconds (static_cast<double> (val) ); }
-
-
-
 }
 
 
